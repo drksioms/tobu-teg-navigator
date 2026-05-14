@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tobu TEG Navigator</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --slate-950: #020617;
+        --slate-900: #0f172a;
+        --slate-800: #1e293b;
+        --slate-700: #334155;
+        --slate-600: #475569;
+        --slate-500: #64748b;
+        --slate-300: #cbd5e1;
+        --slate-200: #e2e8f0;
+        --slate-100: #f1f5f9;
+        --sky-700: #0369a1;
+        --sky-100: #e0f2fe;
+        --sky-50: #f0f9ff;
+        --sky-300: #7dd3fc;
+        --emerald-700: #047857;
+        --emerald-100: #d1fae5;
+        --emerald-50: #ecfdf5;
+        --emerald-300: #6ee7b7;
+        --red-50: #fef2f2;
+        --red-300: #fca5a5;
+        --red-950: #450a0a;
+        --amber-50: #fffbeb;
+        --amber-300: #fcd34d;
+        --amber-950: #451a03;
+        --white: #fff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at 50% -14%, rgba(14, 165, 233, .12), transparent 28rem),
+          linear-gradient(180deg, #030712 0, #07111f 15rem, #090f1a 100%);
+        color: #e5eefb;
+      }
+      button, input { font: inherit; }
+      button { cursor: pointer; border: 0; }
+      .wrap { width: 100%; max-width: 30rem; min-height: 100vh; margin: 0 auto; padding: 1.25rem 1rem; }
+      .home { display: flex; flex-direction: column; padding-top: 1.5rem; }
+      .muted { color: var(--slate-600); }
+      .eyebrow { color: #8ea8c8; font-size: .875rem; font-weight: 700; }
+      h1 { margin: .5rem 0 0; font-size: 2rem; line-height: 1.15; letter-spacing: .01em; }
+      .home h1 { font-size: 2.5rem; }
+      p { margin: 0; }
+      .stack { display: grid; gap: 1rem; }
+      .mt2 { margin-top: .5rem; }
+      .mt3 { margin-top: .75rem; }
+      .mt4 { margin-top: 1rem; }
+      .mt5 { margin-top: 1.25rem; }
+      .mt8 { margin-top: 2rem; }
+      .primary-btn {
+        min-height: 5rem;
+        border-radius: .75rem;
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: white;
+        box-shadow: 0 14px 28px rgba(15, 23, 42, .16);
+      }
+      .btn-gh { background: linear-gradient(135deg, #075985, #0284c7); }
+      .btn-pm { background: linear-gradient(135deg, #065f46, #059669); }
+      .btn-dark {
+        background: linear-gradient(135deg, #f8fafc, #dbeafe);
+        color: #08111f;
+        border: 1px solid rgba(255, 255, 255, .9);
+      }
+      .btn-dark::after {
+        content: "推奨モードを確認";
+        display: block;
+        margin-top: .35rem;
+        font-size: .875rem;
+        font-weight: 800;
+        color: #475569;
+      }
+      .back {
+        min-height: 2.75rem;
+        padding: 0 .75rem;
+        border-radius: .625rem;
+        color: #cbd5e1;
+        background: rgba(255,255,255,.08);
+        font-weight: 700;
+      }
+      .back:active { background: rgba(255,255,255,.16); }
+      .card {
+        border: 1px solid rgba(148, 163, 184, .24);
+        background: rgba(10, 16, 28, .82);
+        border-radius: .875rem;
+        padding: 1rem;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .08);
+        backdrop-filter: blur(10px);
+      }
+      .safety { color: #cbd5e1; }
+      .safety strong { color: #f8fafc; }
+      .choice {
+        min-height: 4rem;
+        padding: .875rem 1rem;
+        border-radius: .875rem;
+        border: 1px solid rgba(148, 163, 184, .24);
+        background: rgba(10, 16, 28, .78);
+        color: #e5eefb;
+        text-align: left;
+        font-weight: 800;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
+      }
+      .choice.selected { border-color: var(--slate-900); background: var(--slate-900); color: white; }
+      .choice small { display: block; margin-top: .2rem; color: #94a3b8; font-size: .8rem; font-weight: 800; }
+      .choice.selected small { color: #cbd5e1; }
+      .utility-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+      .utility-btn {
+        min-height: 4.25rem;
+        border-radius: .875rem;
+        padding: .85rem;
+        border: 1px solid rgba(148, 163, 184, .28);
+        background: rgba(10, 16, 28, .78);
+        color: #e5eefb;
+        text-align: left;
+        font-weight: 900;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
+      }
+      .utility-btn small { display: block; margin-top: .25rem; color: #94a3b8; font-size: .78rem; font-weight: 800; }
+      .tube {
+        border-width: 2px;
+        border-style: solid;
+        border-radius: .875rem;
+        padding: 1rem;
+        box-shadow: 0 14px 28px rgba(15, 23, 42, .1);
+      }
+      .tube.gh { border-color: var(--sky-300); background: #dff1ff; color: var(--slate-950); }
+      .tube.pm { border-color: var(--emerald-300); background: #ddf7ec; color: var(--slate-950); }
+      .tube-row { display: flex; align-items: center; gap: 1rem; }
+      .tube svg { width: 4rem; height: 6.5rem; flex: 0 0 auto; }
+      .tube-title { font-size: 1.5rem; font-weight: 900; }
+      .tube .formal { margin-top: .25rem; font-size: 1.125rem; font-weight: 800; }
+      .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+      .chip { border-radius: .25rem; padding: .25rem .5rem; font-size: .875rem; font-weight: 800; background: white; color: var(--slate-700); }
+      .chip.gh { background: var(--sky-100); color: #075985; }
+      .chip.pm { background: var(--emerald-100); color: #065f46; }
+      .tube-sentence { margin-top: .75rem; font-weight: 800; color: var(--slate-900); }
+      .seg { display: grid; gap: .25rem; padding: .25rem; border-radius: .875rem; background: rgba(203, 213, 225, .76); }
+      .seg.two { grid-template-columns: 1fr 1fr; }
+      .seg.three { grid-template-columns: 1fr 1fr 1fr; }
+      .seg button { min-height: 3rem; border-radius: .625rem; background: transparent; color: var(--slate-700); font-weight: 900; }
+      .seg button.active { background: white; color: var(--slate-950); box-shadow: 0 1px 2px rgba(15, 23, 42, .12); }
+      label.input-card { display: block; }
+      .label-line { display: flex; justify-content: space-between; gap: .75rem; font-size: 1.125rem; font-weight: 900; }
+      .input-row { display: flex; align-items: center; gap: .75rem; margin-top: .75rem; }
+      input {
+        min-height: 3.5rem;
+        min-width: 0;
+        width: 100%;
+        border-radius: .625rem;
+        border: 1px solid var(--slate-300);
+        background: #f8fafc;
+        padding: 0 .75rem;
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--slate-950);
+      }
+      input:focus { outline: none; border-color: var(--slate-900); background: white; }
+      .unit { width: 3rem; flex: 0 0 auto; font-size: 1.125rem; font-weight: 900; color: var(--slate-700); }
+      .submit { width: 100%; min-height: 4rem; border-radius: .875rem; background: linear-gradient(135deg, #0f172a, #22314a); color: white; font-size: 1.25rem; font-weight: 900; box-shadow: 0 14px 28px rgba(15, 23, 42, .16); }
+      .result-card { border-radius: .875rem; border: 1px solid; padding: 1rem; box-shadow: 0 12px 28px rgba(15, 23, 42, .08); }
+      .hero-panel { color: #f8fafc; }
+      .hero-panel .eyebrow, .hero-panel .muted { color: #a9bed8; }
+      .hero-panel h1 { color: #f8fafc; }
+      .mode-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2rem;
+        border-radius: 999px;
+        padding: .25rem .75rem;
+        background: rgba(14, 165, 233, .14);
+        color: #bde4ff;
+        font-weight: 900;
+        font-size: .875rem;
+      }
+      .red { border-color: var(--red-300); background: var(--red-50); color: var(--red-950); }
+      .yellow { border-color: var(--amber-300); background: var(--amber-50); color: var(--amber-950); }
+      .green { border-color: var(--emerald-300); background: var(--emerald-50); color: #022c22; }
+      .gray { border-color: var(--slate-300); background: var(--slate-100); color: var(--slate-800); }
+      .result-card h2 { margin: 0; font-size: 1.125rem; }
+      .info-list { display: grid; gap: .75rem; }
+      .info-item {
+        border-radius: .875rem;
+        border: 1px solid rgba(148, 163, 184, .24);
+        background: rgba(10, 16, 28, .78);
+        padding: 1rem;
+        color: #dbeafe;
+      }
+      .info-item h2 { margin: 0; color: #f8fafc; font-size: 1.15rem; }
+      .info-item p { margin-top: .5rem; color: #cbd5e1; }
+      .tag-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+      .tag { border-radius: 999px; padding: .25rem .65rem; background: rgba(14, 165, 233, .14); color: #bde4ff; font-size: .8rem; font-weight: 900; }
+      .protocol-image {
+        width: 100%;
+        border: 1px solid rgba(148, 163, 184, .28);
+        border-radius: .875rem;
+        background: rgba(10, 16, 28, .78);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, .18);
+      }
+      .image-scroll {
+        overflow-x: auto;
+        border-radius: .875rem;
+      }
+      .image-scroll img {
+        display: block;
+        min-width: 42rem;
+        max-width: none;
+      }
+      dl { margin: .75rem 0 0; display: grid; gap: .5rem; }
+      dt { font-size: .875rem; font-weight: 900; opacity: .75; }
+      dd { margin: .25rem 0 0; }
+      footer { margin-top: auto; padding: 1.5rem 0; text-align: center; font-size: .75rem; color: var(--slate-500); }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const app = document.getElementById("app");
+      const protocolImageUrl = "assets/tobu-trauma-teg-protocol.png";
+      const rank = { red: 0, yellow: 1, green: 2, gray: 3 };
+      let screen = "home";
+      let advisorChoice = "trauma";
+      let ghContext = "general";
+      let pmContext = "trauma";
+      let resultState = null;
+      let ghValues = { ckR: "", ckhR: "", crtMa: "", cffMa: "", ly30: "", fib: "" };
+      let pmValues = { hkhR: "", hkhMa: "", actfMa: "", adpInh: "", aaInh: "", adpMa: "", aaMa: "" };
+
+      const choices = [
+        ["trauma", "外傷", "PM", "", "外傷ではTEG PMを優先的に検討します。", "trauma"],
+        ["tbi", "頭部外傷", "PM", "", "頭部外傷ではADP inhibition評価目的にTEG PMを検討します。", "tbi"],
+        ["ecmo", "ECMO/IMPELLA", "GH", "", "ECMO/IMPELLA中の抗凝固・凝固因子評価はTEG GHを検討します。", "ecmo"],
+        ["antiplatelet", "抗血小板薬内服中の処置前", "PM", "", "抗血小板薬効果を見る目的ならTEG PMを検討します。アスピリンの効果を見る場合は、採血後30分待ってから測定してください。", "antiplatelet"],
+        ["heparin", "ヘパリン影響を見たい", "GH", "", "ヘパリン影響評価はTEG GHを検討します。", "heparin"],
+        ["factor", "凝固因子不足を見たい", "GH", "", "凝固因子不足評価はTEG GHを検討します。", "factor"],
+        ["fibrinogen", "フィブリノゲン不足を見たい", "GH", "PM", "外傷PMではActF-MA、一般評価ではGHのCFF-MAを参照します。", "fibrinogen"],
+        ["lysis", "線溶亢進を見たい", "GH", "", "線溶評価はTEG GHでLY30を確認します。", "lysis"],
+        ["unknown", "原因不明の凝固障害", "GH", "", "原因不明の凝固障害ではまずTEG GHを検討します。", "factor"],
+        ["hypercoagulable", "過凝固・感染兆候を疑う", "GH", "", "MA高値や通常凝固検査と合わせ、TEG GHを参考にします。", "hypercoagulable"]
+      ];
+
+      function safety(compact = false) {
+        return `<section class="card safety ${compact ? "" : ""}">
+          <p><strong>使用時の前提</strong></p>
+          <p class="mt2">本アプリは院内医療者向けの意思決定支援ツールです。治療を自動決定するものではありません。</p>
+          <p class="mt2">TEGは補助指標です。TEGのために止血処置・輸血を遅らせないでください。</p>
+          <p class="mt2"><strong>最終判断は担当医が行ってください。</strong></p>
+        </section>`;
+      }
+      function footer() { return `<footer>Created by Kosei Omasa</footer>`; }
+      function tube(mode) {
+        const gh = mode === "GH";
+        const cap = gh ? "#1976d2" : "#16a34a";
+        const data = gh
+          ? ["TEG GH", "3.2%クエン酸ナトリウム加採血管", "青スピッツ", "凝固検査用スピッツ", "TEG GHでは、3.2%クエン酸ナトリウム加採血管（青スピッツ）を使用してください。"]
+          : ["TEG PM", "ヘパリン加採血管", "緑スピッツ", "Platelet Mapping用スピッツ", "TEG PMでは、ヘパリン加採血管（緑スピッツ）を使用してください。"];
+        return `<section class="tube ${gh ? "gh" : "pm"}">
+          <div class="tube-row">
+            <svg viewBox="0 0 64 104" role="img" aria-label="${data[2]}の採血管イラスト">
+              <rect x="18" y="7" width="28" height="14" rx="4" fill="${cap}"></rect>
+              <rect x="21" y="20" width="22" height="8" rx="2" fill="${cap}" opacity=".85"></rect>
+              <path d="M23 28h18v48c0 8-4 16-9 20-5-4-9-12-9-20V28z" fill="#fff" stroke="#8aa0b5" stroke-width="2"></path>
+              <path d="M25 56h14v20c0 5-3 10-7 14-4-4-7-9-7-14V56z" fill="${cap}" opacity=".18"></path>
+              <line x1="26" y1="40" x2="38" y2="40" stroke="#c7d2de" stroke-width="2"></line>
+              <line x1="26" y1="48" x2="38" y2="48" stroke="#c7d2de" stroke-width="2"></line>
+            </svg>
+            <div>
+              <p class="tube-title">${data[0]}</p>
+              <p class="formal">${data[1]}</p>
+              <div class="chips"><span class="chip ${gh ? "gh" : "pm"}">${data[2]}</span><span class="chip">${data[3]}</span></div>
+            </div>
+          </div>
+          <p class="tube-sentence">${data[4]}</p>
+        </section>`;
+      }
+      function setScreen(next) { screen = next; render(); scrollTo(0, 0); }
+      function render() {
+        if (screen === "protocol") return renderProtocol();
+        if (screen === "compare") return renderCompare();
+        if (screen === "advisorResult") return renderAdvisorResult();
+        if (screen === "advisor") return renderAdvisor();
+        if (screen === "gh") return renderGh();
+        if (screen === "pm") return renderPm();
+        if (screen === "result") return renderResult();
+        renderHome();
+      }
+      function renderHome() {
+        app.innerHTML = `<main class="wrap home">
+          <header class="hero-panel"><span class="mode-pill">院内医療者向け</span><h1>Tobu TEG Navigator</h1><p class="mt3 muted">TEG GH / TEG PMの測定値から、院内プロトコールに沿った解釈を支援します。</p></header>
+          <div class="stack mt8">
+            <button class="primary-btn btn-gh" id="goGh">TEG GHを解釈する</button>
+            <button class="primary-btn btn-pm" id="goPm">TEG PMを解釈する</button>
+            <button class="primary-btn btn-dark" id="goAdvisor">GH / PMどちらを使うか相談する</button>
+          </div>
+          <div class="utility-grid mt5">
+            <button class="utility-btn" id="goProtocol">外傷TEGプロトコール<small>Tobu Trauma TEG Protocol</small></button>
+            <button class="utility-btn" id="goCompare">GH / PMの違い<small>正式名称と使い分け</small></button>
+          </div>
+          <div class="mt8">${safety(true)}</div>${footer()}</main>`;
+        goGh.onclick = () => { ghContext = "general"; setScreen("gh"); };
+        goPm.onclick = () => { pmContext = "trauma"; setScreen("pm"); };
+        goAdvisor.onclick = () => setScreen("advisor");
+        goProtocol.onclick = () => setScreen("protocol");
+        goCompare.onclick = () => setScreen("compare");
+      }
+      function renderAdvisor() {
+        app.innerHTML = `<main class="wrap">
+          <button class="back" id="back">戻る</button>
+          <section class="hero-panel"><span class="mode-pill">Navigator</span><h1>GH / PM選択支援</h1><p class="mt3 muted">使用場面を選ぶと、推奨モードと採血管を次の画面に表示します。</p></section>
+          <div class="stack mt5">${choices.map(c => `<button class="choice" data-choice="${c[0]}">${c[1]}<small>${c[3] ? c[2] + " / " + c[3] : "TEG " + c[2]}を表示</small></button>`).join("")}</div>
+          <div class="mt5">${safety(true)}</div>${footer()}</main>`;
+        back.onclick = () => setScreen("home");
+        document.querySelectorAll("[data-choice]").forEach(b => b.onclick = () => { advisorChoice = b.dataset.choice; setScreen("advisorResult"); });
+      }
+      function renderAdvisorResult() {
+        const d = choices.find(c => c[0] === advisorChoice) || choices[0];
+        app.innerHTML = `<main class="wrap">
+          <button class="back" id="back">選択肢へ戻る</button>
+          <section class="hero-panel">
+            <span class="mode-pill">推奨</span>
+            <h1>${d[3] ? d[2] + " / " + d[3] : "TEG " + d[2]}</h1>
+            <p class="mt3 muted">${d[4]}</p>
+          </section>
+          <div class="stack mt4">${tube(d[2])}${d[3] ? tube(d[3]) : ""}</div>
+          <div class="stack mt5"><button class="submit" id="startMain">TEG ${d[2]}入力へ</button>${d[3] ? `<button class="choice" id="startSub">TEG ${d[3]}入力へ</button>` : ""}</div>
+          <div class="mt5">${safety(true)}</div>${footer()}</main>`;
+        back.onclick = () => setScreen("advisor");
+        startMain.onclick = () => startMode(d[2], d[5]);
+        if (d[3]) startSub.onclick = () => startMode(d[3], d[5]);
+      }
+      function renderProtocol() {
+        app.innerHTML = `<main class="wrap">
+          <button class="back" id="back">戻る</button>
+          <section class="hero-panel"><span class="mode-pill">外傷</span><h1>Tobu Trauma TEG Protocol</h1><p class="mt3 muted">外傷診療では初期対応を優先し、TEG PMは輸血戦略とMTP de-escalation判断の補助として使用します。</p></section>
+          <section class="card mt5">
+            <p><strong>プロトコール画像</strong></p>
+            <p class="mt2 muted">横にスクロールして確認できます。画像を押すと単独で開きます。</p>
+            <a class="image-scroll mt4" href="${protocolImageUrl}" target="_blank" rel="noopener">
+              <img class="protocol-image" src="${protocolImageUrl}" alt="Tobu Trauma TEG Protocol" />
+            </a>
+          </section>
+          <section class="info-list mt5">
+            <article class="info-item"><h2>初期対応</h2><p>院内外傷Call、人員召集、CT、MTP order、必要時TXA検討を優先します。切迫心停止や制御不能出血では現場判断を優先します。</p><div class="tag-row"><span class="tag">MTP</span><span class="tag">Dire-CT</span><span class="tag">TXA検討</span></div></article>
+            <article class="info-item"><h2>TEG PM for add on</h2><p>外傷時はTEG platelet mappingで血小板機能とフィブリノゲン寄与を確認します。測定値は従来の血算・凝固検査、出血所見、画像所見と合わせて判断します。</p><div class="tag-row"><span class="tag">TEG PM</span><span class="tag">Platelet Mapping</span></div></article>
+            <article class="info-item"><h2>Fib低下の検討</h2><p>ActF-MA &lt; 5 mmではフィブリノゲン不足を疑い、Fib 3gを検討します。</p><div class="tag-row"><span class="tag">ActF-MA &lt; 5 mm</span><span class="tag">Fib 3g検討</span></div></article>
+            <article class="info-item"><h2>血餅強度・血小板機能</h2><p>HKH-MA &lt; 45 mm、ADP inhibition &gt; 60%、ADP-MA &lt; 40 mmでは血小板側の問題を参考にし、血小板輸血を検討します。</p><div class="tag-row"><span class="tag">HKH-MA &lt; 45</span><span class="tag">ADP inhibition &gt; 60%</span><span class="tag">ADP-MA &lt; 40</span></div></article>
+            <article class="info-item"><h2>凝固因子不足の参考</h2><p>HKH-R &gt; 10 minは凝固因子不足の可能性を示す参考所見です。単独では強く判断せず、出血量、重症度、通常凝固検査、術野所見と合わせてFFPを検討します。</p><div class="tag-row"><span class="tag">HKH-R &gt; 10 min</span><span class="tag">FFP検討</span></div></article>
+            <article class="info-item"><h2>Stop MTP / de-escalation候補</h2><p>HKH-R &lt; 10 min、HKH-MA改善、ADP inhibition &lt; 60%では、TEG上は凝固・血小板機能の立ち上がりありと考え、出血所見・バイタル・止血状況と合わせてMTP減量/終了を検討します。</p><div class="tag-row"><span class="tag">HKH-R &lt; 10</span><span class="tag">ADP inhibition &lt; 60%</span><span class="tag">自動終了ではない</span></div></article>
+          </section>
+          <div class="mt5">${safety(true)}</div>${footer()}</main>`;
+        back.onclick = () => setScreen("home");
+      }
+      function renderCompare() {
+        app.innerHTML = `<main class="wrap">
+          <button class="back" id="back">戻る</button>
+          <section class="hero-panel"><span class="mode-pill">Guide</span><h1>TEG GH / TEG PMの違い</h1><p class="mt3 muted">どちらもTEG 6sのカートリッジですが、評価したい対象と採血管が異なります。</p></section>
+          <div class="stack mt5">
+            ${tube("GH")}
+            <article class="info-item"><h2>TEG GH</h2><p>正式名称はGlobal Hemostasisです。凝固全体の立ち上がり、ヘパリン影響、凝固因子不足、フィブリノゲン寄与、血餅強度、線溶を俯瞰して評価します。</p><div class="tag-row"><span class="tag">CK-R</span><span class="tag">CKH-R</span><span class="tag">CRT-MA</span><span class="tag">CFF-MA</span><span class="tag">LY30</span></div></article>
+            <article class="info-item"><h2>GHが向く場面</h2><p>ECMO/IMPELLA、ヘパリン影響、凝固因子不足、線溶亢進、原因不明の凝固障害、過凝固・感染兆候の参考評価に向きます。</p></article>
+            ${tube("PM")}
+            <article class="info-item"><h2>TEG PM</h2><p>正式名称はPlatelet Mappingです。全体の血餅強度に加えて、ADP系・AA系の血小板機能抑制を評価します。外傷や頭部外傷、抗血小板薬内服中の処置前評価で参考になります。</p><div class="tag-row"><span class="tag">HKH-R</span><span class="tag">HKH-MA</span><span class="tag">ActF-MA</span><span class="tag">ADP inhibition</span><span class="tag">AA inhibition</span></div></article>
+            <article class="info-item"><h2>PMが向く場面</h2><p>外傷TTP、頭部外傷、抗血小板薬効果の確認、MTP de-escalation候補の評価に向きます。アスピリンの効果を見る場合は、採血後30分待ってから測定してください。</p></article>
+          </div>
+          <div class="mt5">${safety(true)}</div>${footer()}</main>`;
+        back.onclick = () => setScreen("home");
+      }
+      function startMode(mode, ctx) {
+        if (mode === "GH") { ghContext = ctx === "ecmo" ? "ecmo" : "general"; setScreen("gh"); }
+        else { pmContext = ctx === "tbi" || ctx === "antiplatelet" ? ctx : "trauma"; setScreen("pm"); }
+      }
+      function field(id, label, unit, optional = false, value = "") {
+        return `<label class="card input-card"><span class="label-line"><span>${label}</span>${optional ? "<span class='muted' style='font-size:.875rem'>任意</span>" : ""}</span><div class="input-row"><input id="${id}" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" value="${value}" /><span class="unit">${unit}</span></div></label>`;
+      }
+      function bindInputs() {
+        document.querySelectorAll("input").forEach(i => i.oninput = () => i.value = i.value.replace(/[０-９．]/g, ch => ch === "．" ? "." : String.fromCharCode(ch.charCodeAt(0) - 0xfee0)).replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1"));
+      }
+      function val(id) { const v = document.getElementById(id).value; return v === "" ? undefined : Number(v); }
+      function readGhValues() {
+        ghValues = {
+          ckR: document.getElementById("ckR").value,
+          ckhR: document.getElementById("ckhR").value,
+          crtMa: document.getElementById("crtMa").value,
+          cffMa: document.getElementById("cffMa").value,
+          ly30: document.getElementById("ly30").value,
+          fib: document.getElementById("fib") ? document.getElementById("fib").value : ghValues.fib
+        };
+      }
+      function readPmValues() {
+        pmValues = {
+          hkhR: document.getElementById("hkhR").value,
+          hkhMa: document.getElementById("hkhMa").value,
+          actfMa: document.getElementById("actfMa").value,
+          adpInh: document.getElementById("adpInh").value,
+          aaInh: document.getElementById("aaInh").value,
+          adpMa: document.getElementById("adpMa").value,
+          aaMa: document.getElementById("aaMa").value
+        };
+      }
+      function enteredSummary(values, labels) {
+        const rows = labels.map(([key, label, unit]) => `<div><dt>${label}</dt><dd>${values[key] === undefined ? "未入力" : values[key] + " " + unit}</dd></div>`).join("");
+        return `<section class="card mt4"><p class="eyebrow">入力値</p><dl>${rows}</dl></section>`;
+      }
+      function renderGh() {
+        const showFib = ghContext === "ecmo" && ghValues.cffMa !== "" && Number(ghValues.cffMa) < 15;
+        app.innerHTML = `<main class="wrap">
+          <button class="back" id="back">戻る</button><h1>TEG GH入力</h1><div class="mt4">${tube("GH")}</div>
+          <div class="seg two mt4"><button id="general" class="${ghContext === "general" ? "active" : ""}">一般</button><button id="ecmo" class="${ghContext === "ecmo" ? "active" : ""}">ECMO</button></div>
+          <div class="stack mt4">${field("ckR","CK-R","min",false,ghValues.ckR)}${field("ckhR","CKH-R","min",false,ghValues.ckhR)}${field("crtMa","CRT-MA","mm",false,ghValues.crtMa)}${field("cffMa","CFF-MA","mm",false,ghValues.cffMa)}<div id="fibPanel" style="${showFib ? "" : "display:none"}">${field("fib","フィブリノゲン値","mg/dL",false,ghValues.fib)}</div>${field("ly30","LY30","%",false,ghValues.ly30)}</div>
+          <button class="submit mt5" id="submit">解釈する</button><div class="mt5">${safety(true)}</div>${footer()}</main>`;
+        back.onclick = () => setScreen("home");
+        general.onclick = () => { readGhValues(); ghContext = "general"; renderGh(); };
+        ecmo.onclick = () => { readGhValues(); ghContext = "ecmo"; renderGh(); };
+        bindInputs();
+        cffMa.oninput = () => {
+          cffMa.value = cffMa.value.replace(/[０-９．]/g, ch => ch === "．" ? "." : String.fromCharCode(ch.charCodeAt(0) - 0xfee0)).replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+          const panel = document.getElementById("fibPanel");
+          panel.style.display = ghContext === "ecmo" && cffMa.value !== "" && Number(cffMa.value) < 15 ? "" : "none";
+        };
+        submit.onclick = () => {
+          readGhValues();
+          const v = { ckR: val("ckR"), ckhR: val("ckhR"), crtMa: val("crtMa"), cffMa: val("cffMa"), ly30: val("ly30"), fib: document.getElementById("fib") ? val("fib") : undefined };
+          const labels = ghContext === "ecmo" ? [["ckR","CK-R","min"],["ckhR","CKH-R","min"],["crtMa","CRT-MA","mm"],["cffMa","CFF-MA","mm"],["fib","フィブリノゲン値","mg/dL"],["ly30","LY30","%"]] : [["ckR","CK-R","min"],["ckhR","CKH-R","min"],["crtMa","CRT-MA","mm"],["cffMa","CFF-MA","mm"],["ly30","LY30","%"]];
+          resultState = { title: ghContext === "ecmo" ? "TEG GH ECMO解釈" : "TEG GH解釈", results: ghContext === "ecmo" ? interpretEcmo(v) : interpretGh(v), warnings: warningsGh(v), previous: "gh", values: v, labels };
+          setScreen("result");
+        };
+      }
+      function renderPm() {
+        app.innerHTML = `<main class="wrap">
+          <button class="back" id="back">戻る</button><h1>TEG PM入力</h1><div class="mt4">${tube("PM")}</div>
+          <div class="seg three mt4"><button data-pm="trauma" class="${pmContext === "trauma" ? "active" : ""}">外傷</button><button data-pm="tbi" class="${pmContext === "tbi" ? "active" : ""}">頭部外傷</button><button data-pm="antiplatelet" class="${pmContext === "antiplatelet" ? "active" : ""}">抗血小板</button></div>
+          <div class="stack mt4">${field("hkhR","HKH-R","min",false,pmValues.hkhR)}${field("hkhMa","HKH-MA","mm",false,pmValues.hkhMa)}${field("actfMa","ActF-MA","mm",false,pmValues.actfMa)}${field("adpInh","ADP inhibition","%",false,pmValues.adpInh)}${field("aaInh","AA inhibition","%",false,pmValues.aaInh)}${field("adpMa","ADP-MA","mm",true,pmValues.adpMa)}${field("aaMa","AA-MA","mm",true,pmValues.aaMa)}</div>
+          <button class="submit mt5" id="submit">解釈する</button><div class="mt5">${safety(true)}</div>${footer()}</main>`;
+        back.onclick = () => setScreen("home");
+        document.querySelectorAll("[data-pm]").forEach(b => b.onclick = () => { readPmValues(); pmContext = b.dataset.pm; renderPm(); });
+        bindInputs();
+        submit.onclick = () => {
+          readPmValues();
+          const v = { hkhR: val("hkhR"), hkhMa: val("hkhMa"), actfMa: val("actfMa"), adpInhibition: val("adpInh"), aaInhibition: val("aaInh"), adpMa: val("adpMa"), aaMa: val("aaMa") };
+          const label = pmContext === "tbi" ? "頭部外傷" : pmContext === "antiplatelet" ? "抗血小板薬" : "外傷TTP";
+          resultState = { title: `TEG PM ${label}解釈`, results: interpretPm(v, pmContext), warnings: warningsPm(v), previous: "pm", values: v, labels: [["hkhR","HKH-R","min"],["hkhMa","HKH-MA","mm"],["actfMa","ActF-MA","mm"],["adpInhibition","ADP inhibition","%"],["aaInhibition","AA inhibition","%"],["adpMa","ADP-MA","mm"],["aaMa","AA-MA","mm"]] };
+          setScreen("result");
+        };
+      }
+      function card(id, severity, title, assessment, action, rationale = "", strength = "参考") { return { id, severity, title, assessment, action, rationale, strength }; }
+      function un(id, label) { return card(id, "gray", `【未評価】${label}`, "未入力のため未評価です。", "入力後、該当項目を再評価してください。", "", "注意"); }
+      function sort(rs) { return rs.sort((a, b) => rank[a.severity] - rank[b.severity]); }
+      function interpretGh(v) {
+        const r = [];
+        if (v.ckR === undefined && v.ckhR === undefined) {
+          r.push(un("gh-r-un","R時間"));
+        } else if (v.ckR !== undefined && v.ckhR === undefined) {
+          if (v.ckR > 10) r.push(card("gh-ckr-high","red","【異常】CK-R延長","CK-R延長を認めます。ヘパリン影響または凝固因子不足の可能性があります。","CKH-R、通常凝固検査、ヘパリン使用状況と合わせて評価してください。",`CK-R ${v.ckR} min`,"検討"));
+          else r.push(card("gh-ckr-ok","green","【範囲内】CK-R","CK-Rは正常目安の範囲内です。","CKH-Rや他の項目、臨床所見と合わせて判断してください。",`CK-R ${v.ckR} min`));
+          r.push(un("gh-ckhr-un","CKH-R"));
+        } else if (v.ckR === undefined && v.ckhR !== undefined) {
+          if (v.ckhR > 10) r.push(card("gh-ckhr-high","red","【異常】CKH-R延長","CKH-R延長を認めます。ヘパリン影響を除いた凝固能低下の可能性があります。","CK-R、通常凝固検査、出血所見と合わせてFFP補充を検討します。",`CKH-R ${v.ckhR} min`,"検討"));
+          else r.push(card("gh-ckhr-ok","green","【範囲内】CKH-R","CKH-Rは正常目安の範囲内です。","CK-Rや他の項目、臨床所見と合わせて判断してください。",`CKH-R ${v.ckhR} min`));
+          r.push(un("gh-ckr-un","CK-R"));
+        } else {
+          const er = v.ckR > 10, ehr = v.ckhR > 10, gap = v.ckR > v.ckhR;
+          if (er && ehr && gap) r.push(card("gh-r-combo","red","【異常】凝固因子不足 + ヘパリン影響","凝固因子不足とヘパリン影響の併存を疑います。","FFP補充およびプロタミンを検討します。",`CK-R ${v.ckR} min、CKH-R ${v.ckhR} min`,"検討"));
+          else if (er && !ehr && gap) r.push(card("gh-r-hep","red","【異常】ヘパリン影響","自己凝固能は保たれ、ヘパリン影響が主体の可能性があります。","プロタミンを検討します。",`CK-R ${v.ckR} min、CKH-R ${v.ckhR} min`,"検討"));
+          else if (er && ehr) r.push(card("gh-r-factor","red","【異常】凝固因子不足","ヘパリンより凝固因子不足が主体の可能性があります。","FFP補充を検討します。",`CK-R ${v.ckR} min、CKH-R ${v.ckhR} min`,"検討"));
+          else r.push(card("gh-r-ok","green","【範囲内】R時間","R時間上は明らかな凝固因子不足・ヘパリン影響は目立ちません。","他の項目と臨床所見を確認してください。",`CK-R ${v.ckR} min、CKH-R ${v.ckhR} min`));
+        }
+        if (v.crtMa === undefined && v.cffMa === undefined) {
+          r.push(un("gh-ma-un","血餅強度"));
+        } else if (v.crtMa !== undefined && v.cffMa === undefined) {
+          if (v.crtMa < 50) r.push(card("gh-crt-low","red","【異常】CRT-MA低値","血餅強度低下を疑います。血小板側またはフィブリノゲン側の問題の可能性があります。","CFF-MA、血小板数、フィブリノゲン値、出血所見と合わせて補充を検討します。",`CRT-MA ${v.crtMa} mm`,"検討"));
+          else r.push(card("gh-crt-ok","green","【範囲内】CRT-MA","CRT-MAは正常目安の範囲内です。","CFF-MA、血小板数、出血所見と合わせて判断してください。",`CRT-MA ${v.crtMa} mm`));
+          r.push(un("gh-cff-un","CFF-MA"));
+        } else if (v.crtMa === undefined && v.cffMa !== undefined) {
+          if (v.cffMa < 15) r.push(card("gh-cff-low","red","【異常】フィブリノゲン低下","フィブリノゲン不足または凝集能低下を疑います。","Fib製剤/クリオ/FFPを検討します。",`CFF-MA ${v.cffMa} mm`,"検討"));
+          else r.push(card("gh-cff-ok","green","【範囲内】CFF-MA","CFF-MAは正常目安の範囲内です。","CRT-MA、実測フィブリノゲン値、出血所見と合わせて判断してください。",`CFF-MA ${v.cffMa} mm`));
+          r.push(un("gh-crt-un","CRT-MA"));
+        } else {
+          const crt = v.crtMa < 50, cff = v.cffMa < 15;
+          if (crt && cff) r.push(card("gh-ma-both","red","【異常】血小板 + フィブリノゲン低下","血小板側とフィブリノゲン側の両者低下を疑います。","血小板輸血およびFib製剤/クリオ/FFPを検討します。",`CRT-MA ${v.crtMa} mm、CFF-MA ${v.cffMa} mm`,"検討"));
+          else if (crt) r.push(card("gh-ma-plt","red","【異常】血小板側の問題","血小板側の問題を疑います。","血小板輸血を検討します。",`CRT-MA ${v.crtMa} mm、CFF-MA ${v.cffMa} mm`,"検討"));
+          else if (cff) r.push(card("gh-ma-fib","red","【異常】フィブリノゲン低下","フィブリノゲン不足または凝集能低下を疑います。","Fib製剤/クリオ/FFPを検討します。",`CFF-MA ${v.cffMa} mm`,"検討"));
+          else r.push(card("gh-ma-ok","green","【範囲内】血餅強度","血餅強度は概ね保たれています。","臨床的出血が続く場合は、外科的出血・希釈・薬剤影響・再検を検討します。",`CRT-MA ${v.crtMa} mm、CFF-MA ${v.cffMa} mm`));
+        }
+        if (v.ly30 === undefined) r.push(un("gh-ly-un","LY30"));
+        else if (v.ly30 > 3) r.push(card("gh-ly-high","red","【異常】線溶亢進","線溶亢進を疑います。","TXA投与を検討します。",`LY30 ${v.ly30}%`,"検討"));
+        else r.push(card("gh-ly-ok","green","【範囲内】LY30","LY30上は明らかな線溶亢進は目立ちません。","臨床所見と合わせて判断してください。",`LY30 ${v.ly30}%`));
+        return sort(r);
+      }
+      function interpretEcmo(v) {
+        const r = [];
+        if (v.ckR === undefined) r.push(un("ecmo-ckr-un","CK-R目標域"));
+        else if (v.ckR >= 16 && v.ckR <= 24) r.push(card("ecmo-ckr-ok","green","【範囲内】CK-R目標域","ヘパリン管理の参考レンジ内です。","APTT、ACT、出血所見、回路所見と合わせて継続評価してください。",`CK-R ${v.ckR} min`));
+        else r.push(card("ecmo-ckr-ng","red",v.ckR > 24 ? "【異常】抗凝固過多" : "【異常】抗凝固不足",v.ckR > 24 ? "抗凝固過多の可能性があります。" : "抗凝固不足の可能性があります。",v.ckR > 24 ? "ヘパリン減量を検討します。" : "ヘパリン増量を検討します。",`CK-R ${v.ckR} min`,"検討"));
+        if (v.ckhR === undefined) r.push(un("ecmo-ckhr-un","CKH-R"));
+        else if (v.ckhR > 16) r.push(card("ecmo-ckhr-red","red","【異常】凝固因子不足","凝固因子不足を疑います。","出血所見、凝固検査、フィブリノゲン値と合わせてFFP補充を検討します。",`CKH-R ${v.ckhR} min`,"検討"));
+        else if (v.ckhR > 10) r.push(card("ecmo-ckhr-yellow","yellow","【要判断】CKH-R軽度延長","軽度〜中等度の凝固因子低下の可能性があります。","出血傾向がなければ補正なしも検討します。出血時はFFP補正を検討します。",`CKH-R ${v.ckhR} min`,"Expert opinion / 参考"));
+        if (v.ckR !== undefined && v.ckhR > 0 && v.ckR / v.ckhR > 2) r.push(card("ecmo-ratio","red","【異常】ヘパリン影響","ヘパリン影響が強い可能性があります。","APTT、ACT、出血・回路所見と合わせてヘパリン調整を検討します。",`CK-R / CKH-R ${(v.ckR / v.ckhR).toFixed(2)}`,"検討"));
+        if (v.cffMa !== undefined && v.cffMa < 15) {
+          if (v.fib === undefined) {
+            r.push(card("ecmo-cff-low-fib-un","yellow","【要判断】CFF-MA低値","CFF-MA低値です。フィブリノゲン低下または凝集能低下の可能性があります。","フィブリノゲン実測値を確認してください。Fib >150 mg/dLなら第XIII因子欠乏を示唆する可能性、Fib <150 mg/dLならFFP補充を検討します。",`CFF-MA ${v.cffMa} mm、Fib 未入力`,"Expert opinion / 参考"));
+          } else if (v.fib > 150) {
+            r.push(card("ecmo-cff-low-fib-high","yellow","【要判断】第XIII因子欠乏の可能性","CFF-MA低値ですが、フィブリノゲン値は150 mg/dLを超えています。第XIII因子欠乏を示唆する可能性があります。","出血所見、LY30、通常凝固検査、院内プロトコールと合わせて評価してください。",`CFF-MA ${v.cffMa} mm、Fib ${v.fib} mg/dL`,"Expert opinion / 参考"));
+          } else if (v.fib < 150) {
+            r.push(card("ecmo-cff-low-fib-low","red","【異常】フィブリノゲン低下","CFF-MA低値かつフィブリノゲン値150 mg/dL未満です。フィブリノゲン不足を疑います。","出血所見、凝固検査と合わせてFFP補充を検討します。",`CFF-MA ${v.cffMa} mm、Fib ${v.fib} mg/dL`,"検討"));
+          } else {
+            r.push(card("ecmo-cff-low-fib-border","yellow","【要判断】CFF-MA低値","CFF-MA低値で、フィブリノゲン値は150 mg/dLです。境界値として扱います。","出血所見、LY30、通常凝固検査と合わせて評価してください。",`CFF-MA ${v.cffMa} mm、Fib ${v.fib} mg/dL`,"Expert opinion / 参考"));
+          }
+        }
+        if ((v.crtMa !== undefined && v.crtMa >= 70) || (v.cffMa !== undefined && v.cffMa >= 35)) r.push(card("ecmo-ma","yellow","【要判断】MA高値","過凝固・炎症・感染兆候の可能性があります。","感染、炎症、血栓リスク、回路所見を確認してください。",`CRT-MA ${v.crtMa ?? "未入力"} mm、CFF-MA ${v.cffMa ?? "未入力"} mm`,"Expert opinion / 参考"));
+        else if (v.crtMa === undefined && v.cffMa === undefined) r.push(un("ecmo-ma-un","MA高値"));
+        r.push(card("ecmo-note","yellow","【要判断】ECMO中TEG GH","TEG GHはAPTT/ACTの代替ではなく補助指標です。","回路所見、出血所見、血栓所見、通常凝固検査と合わせて判断してください。","","Expert opinion / 参考"));
+        return sort(r);
+      }
+      function interpretPm(v, ctx) {
+        const r = [];
+        if (ctx === "tbi") r.push(card("tbi-note","yellow","【要判断】頭部外傷と血小板機能","抗血小板薬内服がなくても、頭部外傷そのものにより血小板機能抑制を来す可能性があります。","ADP inhibition、ADP-MA、出血所見と合わせて評価してください。","","Expert opinion / 参考"));
+        if (v.actfMa === undefined) r.push(un("actf-un","ActF-MA"));
+        else if (v.actfMa < 5) r.push(card("actf-low","red","【異常】フィブリノゲン低下","フィブリノゲン不足または凝集能低下を疑います。","Fib 3g投与を検討します。",`ActF-MA ${v.actfMa} mm`,"検討"));
+        else r.push(card("actf-ok","green","【範囲内】ActF-MA",v.actfMa >= 10.5 ? "Fib 200mg/dL相当以上の目安です。" : "Fib 150mg/dL相当以上の目安です。","実測フィブリノゲン値、出血所見と合わせて判断してください。",`ActF-MA ${v.actfMa} mm`));
+        if (v.hkhMa === undefined) r.push(un("hkhma-un","HKH-MA"));
+        else if (v.hkhMa < 45) r.push(card("hkhma-low","red","【異常】血餅強度低下","全体の血餅強度低下を疑います。","血小板輸血を検討します。",`HKH-MA ${v.hkhMa} mm`,"検討"));
+        else r.push(card("hkhma-ok","green","【範囲内】HKH-MA","全体の血餅強度は目標範囲内の目安です。","臨床所見と合わせて判断してください。",`HKH-MA ${v.hkhMa} mm`));
+        if (v.adpInhibition === undefined) r.push(un("adp-un","ADP inhibition"));
+        else if (v.adpInhibition > 60) r.push(card("adp-high","red","【異常】ADP系血小板機能抑制",ctx === "tbi" ? "頭部外傷に伴うADP系血小板機能抑制を疑います。" : "ADP系血小板機能抑制を疑います。","血小板輸血を検討します。",`ADP inhibition ${v.adpInhibition}%`,"検討"));
+        else r.push(card("adp-ok","green","【範囲内】ADP inhibition","外傷TTPの重要閾値は超えていません。","ADP-MA、血小板数、出血所見と合わせて判断してください。",`ADP inhibition ${v.adpInhibition}%`));
+        if (v.aaInhibition === undefined) r.push(un("aa-un","AA inhibition"));
+        else if (v.aaInhibition > 30) r.push(card("aa-high","yellow","【要判断】アスピリン効果","AA系抑制あり。アスピリン効果の可能性があります。","アスピリンの効果を見る場合は、採血後30分待ってから測定した値か確認してください。処置延期、方法変更、血小板輸血を臨床状況に応じて検討します。",`AA inhibition ${v.aaInhibition}%`,"参考"));
+        else r.push(card("aa-ok","green","【範囲内】AA inhibition","AA inhibitionは30%以下です。抗血小板薬効果は強くない可能性があります。","薬剤歴、出血所見、処置リスクと合わせて判断してください。",`AA inhibition ${v.aaInhibition}%`));
+        if (v.hkhR === undefined) r.push(un("hkhr-un","HKH-R"));
+        else if (v.hkhR > 10) r.push(card("hkhr-high","yellow","【要判断】HKH-R延長","凝固因子不足の可能性を参考所見として表示します。","出血量、重症度、通常凝固検査、術野所見と合わせてFFPを検討します。HKH-R単独でFFP判断を強く推奨しません。",`HKH-R ${v.hkhR} min`,"Expert opinion / 参考"));
+        else r.push(card("hkhr-ok","green","【範囲内】HKH-R","HKH-Rは10分以内です。ただしPMのR時間は確立閾値ではありません。","他の項目と臨床所見を確認してください。",`HKH-R ${v.hkhR} min`));
+        if (v.adpMa === undefined) r.push(un("adpma-un","ADP-MA"));
+        else if (v.adpMa <= 20) r.push(card("adpma-vlow","yellow","【要判断】ADP-MA著明低値","ADP系血小板機能低下が強い可能性があります。","血小板輸血を検討します。",`ADP-MA ${v.adpMa} mm`,"Expert opinion / 検討"));
+        else if (v.adpMa <= 40) r.push(card("adpma-low","yellow","【要判断】ADP-MA低値","ADP系血小板機能低下の可能性があります。","ADP inhibition、血小板数、出血所見と合わせて血小板輸血を検討します。",`ADP-MA ${v.adpMa} mm`,"Expert opinion / 参考"));
+        else r.push(card("adpma-ok","green","【範囲内】ADP-MA","ADP-MAは参考低値閾値を下回っていません。","ADP inhibition、血小板数、出血所見と合わせて判断してください。",`ADP-MA ${v.adpMa} mm`));
+        if (v.aaMa === undefined) r.push(un("aama-un","AA-MA"));
+        else r.push(card("aama-ref","yellow","【要判断】AA-MA参考値","AA-MAは参考値として表示します。","AA inhibition、アスピリン内服歴、採血後30分待って測定した値かを確認してください。",`AA-MA ${v.aaMa} mm`,"Expert opinion / 参考"));
+        if (ctx === "antiplatelet") {
+          if (v.adpInhibition > 30) r.push(card("ap-adp","yellow","【要判断】P2Y12阻害薬効果","P2Y12阻害薬効果の可能性があります。","クロピドグレル、プラスグレル、チカグレロルなどの影響を検討します。",`ADP inhibition ${v.adpInhibition}%`));
+        }
+        if (v.hkhR < 10 && v.hkhMa >= 45 && v.adpInhibition < 60 && v.actfMa >= 5) r.push(card("mtp","yellow","【要判断】MTP de-escalation候補","TEG上は凝固・血小板機能の立ち上がりがあります。","出血所見・バイタル・止血状況と合わせてMTP減量/終了を検討します。自動終了してよいという意味ではありません。","","Expert opinion / 検討"));
+        return sort(r);
+      }
+      function warningsGh(v) {
+        const w = [];
+        if (v.ckR > 70) w.push("CK-R: flat line相当の可能性があります。TEG画面を確認してください。");
+        if (v.ckhR > 70) w.push("CKH-R: flat line相当の可能性があります。TEG画面を確認してください。");
+        if (v.crtMa > 90) w.push("CRT-MA: 明らかに高い値です。入力値を確認してください。");
+        if (v.cffMa > 60) w.push("CFF-MA: 明らかに高い値です。入力値を確認してください。");
+        if (v.ly30 > 100) w.push("LY30: LY30は%表示です。入力値を確認してください。");
+        return w;
+      }
+      function warningsPm(v) {
+        const w = [];
+        if (v.adpInhibition > 100) w.push("ADP inhibition: Inhibitionは0〜100%で入力してください。");
+        if (v.aaInhibition > 100) w.push("AA inhibition: Inhibitionは0〜100%で入力してください。");
+        if (v.hkhR > 70) w.push("HKH-R: flat line相当の可能性があります。TEG画面を確認してください。");
+        return w;
+      }
+      function renderResult() {
+        app.innerHTML = `<main class="wrap">
+          <div><button class="back" id="back">入力へ戻る</button><button class="back" id="home">トップ</button></div>
+          <h1>${resultState.title}</h1>
+          ${enteredSummary(resultState.values, resultState.labels)}
+          ${resultState.warnings.length ? `<section class="result-card yellow mt4">${resultState.warnings.map(w => `<p>${w}</p>`).join("")}</section>` : ""}
+          <section class="stack mt4">${resultState.results.map(r => `<article class="result-card ${r.severity}"><h2>${r.title}</h2><dl><div><dt>判定</dt><dd>${r.assessment}</dd></div>${r.rationale ? `<div><dt>根拠</dt><dd>${r.rationale}</dd></div>` : ""}<div><dt>次に検討</dt><dd><strong>${r.action}</strong></dd></div><div><dt>文言強度</dt><dd>${r.strength}</dd></div></dl></article>`).join("")}</section>
+          <div class="mt5">${safety()}</div>${footer()}</main>`;
+        back.onclick = () => setScreen(resultState.previous);
+        home.onclick = () => setScreen("home");
+      }
+      render();
+    </script>
+  </body>
+</html>
