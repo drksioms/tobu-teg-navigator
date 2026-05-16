@@ -185,7 +185,26 @@
         font-weight: 900;
         font-size: .875rem;
       }
+      .notice-card {
+        border-radius: .875rem;
+        border: 1px solid var(--amber-300);
+        background: var(--amber-50);
+        color: var(--amber-950);
+        padding: 1rem;
+        font-weight: 800;
+        line-height: 1.65;
+      }
+      .inline-highlight {
+        display: inline;
+        border-radius: .25rem;
+        background: #fde68a;
+        padding: .05rem .25rem;
+        font-weight: 900;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
       .red { border-color: var(--red-300); background: var(--red-50); color: var(--red-950); }
+      .red.urgent { border-width: 2px; border-color: #dc2626; background: #fee2e2; box-shadow: 0 0 0 3px rgba(248, 113, 113, .45), 0 16px 34px rgba(127, 29, 29, .24); }
       .yellow { border-color: var(--amber-300); background: var(--amber-50); color: var(--amber-950); }
       .green { border-color: var(--emerald-300); background: var(--emerald-50); color: #022c22; }
       .gray { border-color: var(--slate-300); background: var(--slate-100); color: var(--slate-800); }
@@ -210,14 +229,25 @@
         box-shadow: 0 14px 28px rgba(15, 23, 42, .18);
       }
       .image-scroll {
+        display: block;
         overflow-x: auto;
         border-radius: .875rem;
       }
       .image-scroll img {
         display: block;
+        margin: 0 auto;
         min-width: 42rem;
         max-width: none;
       }
+      .inline-note {
+        border-radius: .875rem;
+        border: 1px solid rgba(148, 163, 184, .28);
+        background: rgba(10, 16, 28, .78);
+        padding: 1rem;
+        color: #dbeafe;
+      }
+      .inline-note h2 { margin: 0; color: #f8fafc; font-size: 1rem; }
+      .inline-note p { margin-top: .5rem; color: #cbd5e1; line-height: 1.65; }
       dl { margin: .75rem 0 0; display: grid; gap: .5rem; }
       dt { font-size: .875rem; font-weight: 900; opacity: .75; }
       dd { margin: .25rem 0 0; }
@@ -240,15 +270,15 @@
 
       const choices = [
         ["trauma", "外傷", "PM", "", "外傷ではTEG PMを優先的に検討します。", "trauma"],
-        ["tbi", "頭部外傷", "PM", "", "頭部外傷ではADP inhibition評価目的にTEG PMを検討します。", "tbi"],
         ["ecmo", "ECMO/IMPELLA", "GH", "", "ECMO/IMPELLA中の抗凝固・凝固因子評価はTEG GHを検討します。", "ecmo"],
-        ["antiplatelet", "抗血小板薬内服中の処置前", "PM", "", "抗血小板薬効果を見る目的ならTEG PMを検討します。アスピリンの効果を見る場合は、採血後30分待ってから測定してください。", "antiplatelet"],
+        ["antiplatelet", "抗血小板の効果判定をしたい", "PM", "", "抗血小板薬の効果判定にはTEG PMを検討します。アスピリンの効果を見る場合は、採血後30分待ってから測定してください。", "antiplatelet"],
         ["heparin", "ヘパリン影響を見たい", "GH", "", "ヘパリン影響評価はTEG GHを検討します。", "heparin"],
         ["factor", "凝固因子不足を見たい", "GH", "", "凝固因子不足評価はTEG GHを検討します。", "factor"],
         ["fibrinogen", "フィブリノゲン不足を見たい", "GH", "PM", "外傷PMではActF-MA、一般評価ではGHのCFF-MAを参照します。", "fibrinogen"],
         ["lysis", "線溶亢進を見たい", "GH", "", "線溶評価はTEG GHでLY30を確認します。", "lysis"],
         ["unknown", "原因不明の凝固障害", "GH", "", "原因不明の凝固障害ではまずTEG GHを検討します。", "factor"],
-        ["hypercoagulable", "過凝固・感染兆候を疑う", "GH", "", "MA高値や通常凝固検査と合わせ、TEG GHを参考にします。", "hypercoagulable"]
+        ["hypercoagulable", "過凝固・感染兆候を疑う", "GH", "", "MA高値や通常凝固検査と合わせ、TEG GHを参考にします。", "hypercoagulable"],
+        ["vwf", "vWF活性を推定したい", "", "", "TEGではvWF活性を直接測定できません。TEG正常でも出血傾向がある場合は、vWF活性低下を考慮します。", ""]
       ];
 
       function safety(compact = false) {
@@ -260,6 +290,7 @@
         </section>`;
       }
       function footer() { return `<footer>Created by Kosei Omasa</footer>`; }
+      function byId(id) { return document.getElementById(id); }
       function tube(mode) {
         const gh = mode === "GH";
         const cap = gh ? "#1976d2" : "#16a34a";
@@ -299,7 +330,11 @@
       function renderHome() {
         app.innerHTML = `<main class="wrap home">
           <header class="hero-panel"><span class="mode-pill">院内医療者向け</span><h1>Tobu TEG Navigator</h1><p class="mt3 muted">TEG GH / TEG PMの測定値から、院内プロトコールに沿った解釈を支援します。</p></header>
-          <div class="stack mt8">
+          <section class="card mt5">
+            <p><strong>TEG manager</strong></p>
+            <p class="mt2">ID: teg / PASS: tobu1111</p>
+          </section>
+          <div class="stack mt5">
             <button class="primary-btn btn-gh" id="goGh">TEG GHを解釈する</button>
             <button class="primary-btn btn-pm" id="goPm">TEG PMを解釈する</button>
             <button class="primary-btn btn-dark" id="goAdvisor">GH / PMどちらを使うか相談する</button>
@@ -309,36 +344,57 @@
             <button class="utility-btn" id="goCompare">GH / PMの違い<small>正式名称と使い分け</small></button>
           </div>
           <div class="mt8">${safety(true)}</div>${footer()}</main>`;
-        goGh.onclick = () => { ghContext = "general"; setScreen("gh"); };
-        goPm.onclick = () => { pmContext = "trauma"; setScreen("pm"); };
-        goAdvisor.onclick = () => setScreen("advisor");
-        goProtocol.onclick = () => setScreen("protocol");
-        goCompare.onclick = () => setScreen("compare");
+        byId("goGh").onclick = () => { ghContext = "general"; setScreen("gh"); };
+        byId("goPm").onclick = () => { pmContext = "trauma"; setScreen("pm"); };
+        byId("goAdvisor").onclick = () => setScreen("advisor");
+        byId("goProtocol").onclick = () => setScreen("protocol");
+        byId("goCompare").onclick = () => setScreen("compare");
       }
       function renderAdvisor() {
         app.innerHTML = `<main class="wrap">
           <button class="back" id="back">戻る</button>
           <section class="hero-panel"><span class="mode-pill">Navigator</span><h1>GH / PM選択支援</h1><p class="mt3 muted">使用場面を選ぶと、推奨モードと採血管を次の画面に表示します。</p></section>
-          <div class="stack mt5">${choices.map(c => `<button class="choice" data-choice="${c[0]}">${c[1]}<small>${c[3] ? c[2] + " / " + c[3] : "TEG " + c[2]}を表示</small></button>`).join("")}</div>
+          <div class="stack mt5">${choices.map(c => `<button class="choice" data-choice="${c[0]}">${c[1]}</button>`).join("")}</div>
           <div class="mt5">${safety(true)}</div>${footer()}</main>`;
-        back.onclick = () => setScreen("home");
+        byId("back").onclick = () => setScreen("home");
         document.querySelectorAll("[data-choice]").forEach(b => b.onclick = () => { advisorChoice = b.dataset.choice; setScreen("advisorResult"); });
       }
       function renderAdvisorResult() {
         const d = choices.find(c => c[0] === advisorChoice) || choices[0];
+        if (advisorChoice === "vwf") {
+          app.innerHTML = `<main class="wrap">
+            <button class="back" id="back">選択肢へ戻る</button>
+            <section class="hero-panel">
+              <span class="mode-pill">参考</span>
+              <h1>TEGでは測定不能</h1>
+              <p class="mt3 muted">vWF活性はTEG GH / TEG PMでは直接評価できません。</p>
+            </section>
+            <article class="result-card yellow mt5">
+              <h2>【要判断】vWF活性低下の考慮</h2>
+              <dl>
+                <div><dt>判定</dt><dd>TEGではvWF活性を直接測定できません。</dd></div>
+                <div><dt>次に検討</dt><dd>TEGが正常範囲でも出血傾向がある場合は、vWF活性低下を考慮し、通常凝固検査やvWF関連検査と合わせて評価してください。</dd></div>
+                <div><dt>文言強度</dt><dd>Expert opinion / 参考</dd></div>
+              </dl>
+            </article>
+            <div class="mt5">${safety(true)}</div>${footer()}</main>`;
+          byId("back").onclick = () => setScreen("advisor");
+          return;
+        }
+        const message = advisorChoice === "antiplatelet" ? `<section class="notice-card mt4">${d[4]}</section>` : `<p class="mt3 muted">${d[4]}</p>`;
         app.innerHTML = `<main class="wrap">
           <button class="back" id="back">選択肢へ戻る</button>
           <section class="hero-panel">
             <span class="mode-pill">推奨</span>
             <h1>${d[3] ? d[2] + " / " + d[3] : "TEG " + d[2]}</h1>
-            <p class="mt3 muted">${d[4]}</p>
+            ${message}
           </section>
           <div class="stack mt4">${tube(d[2])}${d[3] ? tube(d[3]) : ""}</div>
           <div class="stack mt5"><button class="submit" id="startMain">TEG ${d[2]}入力へ</button>${d[3] ? `<button class="choice" id="startSub">TEG ${d[3]}入力へ</button>` : ""}</div>
           <div class="mt5">${safety(true)}</div>${footer()}</main>`;
-        back.onclick = () => setScreen("advisor");
-        startMain.onclick = () => startMode(d[2], d[5]);
-        if (d[3]) startSub.onclick = () => startMode(d[3], d[5]);
+        byId("back").onclick = () => setScreen("advisor");
+        byId("startMain").onclick = () => startMode(d[2], d[5]);
+        if (d[3]) byId("startSub").onclick = () => startMode(d[3], d[5]);
       }
       function renderProtocol() {
         app.innerHTML = `<main class="wrap">
@@ -360,7 +416,13 @@
             <article class="info-item"><h2>Stop MTP / de-escalation候補</h2><p>HKH-R &lt; 10 min、HKH-MA改善、ADP inhibition &lt; 60%では、TEG上は凝固・血小板機能の立ち上がりありと考え、出血所見・バイタル・止血状況と合わせてMTP減量/終了を検討します。</p><div class="tag-row"><span class="tag">HKH-R &lt; 10</span><span class="tag">ADP inhibition &lt; 60%</span><span class="tag">自動終了ではない</span></div></article>
           </section>
           <div class="mt5">${safety(true)}</div>${footer()}</main>`;
-        back.onclick = () => setScreen("home");
+        byId("back").onclick = () => setScreen("home");
+        centerProtocolImage();
+      }
+      function centerProtocolImage() {
+        const scroller = document.querySelector(".image-scroll");
+        if (!scroller) return;
+        scroller.scrollLeft = Math.max(0, (scroller.scrollWidth - scroller.clientWidth) / 2);
       }
       function renderCompare() {
         app.innerHTML = `<main class="wrap">
@@ -369,17 +431,19 @@
           <div class="stack mt5">
             ${tube("GH")}
             <article class="info-item"><h2>TEG GH</h2><p>正式名称はGlobal Hemostasisです。凝固全体の立ち上がり、ヘパリン影響、凝固因子不足、フィブリノゲン寄与、血餅強度、線溶を俯瞰して評価します。</p><div class="tag-row"><span class="tag">CK-R</span><span class="tag">CKH-R</span><span class="tag">CRT-MA</span><span class="tag">CFF-MA</span><span class="tag">LY30</span></div></article>
+            <article class="info-item"><h2>GH基準値一覧</h2><p>一般解釈では以下を目安にします。ECMO中は専用目標域で評価します。</p><div class="tag-row"><span class="tag">CK-R ≤ 10 min</span><span class="tag">CKH-R ≤ 10 min</span><span class="tag">CRT-MA ≥ 50 mm</span><span class="tag">CFF-MA ≥ 15 mm</span><span class="tag">LY30 ≤ 3%</span></div></article>
             <article class="info-item"><h2>GHが向く場面</h2><p>ECMO/IMPELLA、ヘパリン影響、凝固因子不足、線溶亢進、原因不明の凝固障害、過凝固・感染兆候の参考評価に向きます。</p></article>
             ${tube("PM")}
-            <article class="info-item"><h2>TEG PM</h2><p>正式名称はPlatelet Mappingです。全体の血餅強度に加えて、ADP系・AA系の血小板機能抑制を評価します。外傷や頭部外傷、抗血小板薬内服中の処置前評価で参考になります。</p><div class="tag-row"><span class="tag">HKH-R</span><span class="tag">HKH-MA</span><span class="tag">ActF-MA</span><span class="tag">ADP inhibition</span><span class="tag">AA inhibition</span></div></article>
+            <article class="info-item"><h2>TEG PM</h2><p>正式名称はPlatelet Mappingです。全体の血餅強度に加えて、ADP系・AA系の血小板機能抑制を評価します。外傷や頭部外傷、抗血小板薬効果の判定で参考になります。</p><div class="tag-row"><span class="tag">HKH-R</span><span class="tag">HKH-MA</span><span class="tag">ActF-MA</span><span class="tag">ADP inhibition</span><span class="tag">AA inhibition</span></div></article>
+            <article class="info-item"><h2>PM基準値一覧</h2><p>外傷TTPでは以下を目安にします。ADP-MAとAA inhibitionは参考所見として扱います。</p><div class="tag-row"><span class="tag">HKH-R ≤ 10 min</span><span class="tag">HKH-MA ≥ 45 mm</span><span class="tag">ActF-MA ≥ 5 mm</span><span class="tag">4.5 mm ≒ Fib 150 mg/dL</span><span class="tag">10.5 mm ≒ Fib 200 mg/dL</span><span class="tag">ADP inhibition ≤ 60%</span><span class="tag">ADP-MA > 40 mm</span><span class="tag">AA inhibition ≤ 30%</span></div></article>
             <article class="info-item"><h2>PMが向く場面</h2><p>外傷TTP、頭部外傷、抗血小板薬効果の確認、MTP de-escalation候補の評価に向きます。アスピリンの効果を見る場合は、採血後30分待ってから測定してください。</p></article>
           </div>
           <div class="mt5">${safety(true)}</div>${footer()}</main>`;
-        back.onclick = () => setScreen("home");
+        byId("back").onclick = () => setScreen("home");
       }
       function startMode(mode, ctx) {
         if (mode === "GH") { ghContext = ctx === "ecmo" ? "ecmo" : "general"; setScreen("gh"); }
-        else { pmContext = ctx === "tbi" || ctx === "antiplatelet" ? ctx : "trauma"; setScreen("pm"); }
+        else { pmContext = ctx === "antiplatelet" ? ctx : "trauma"; setScreen("pm"); }
       }
       function field(id, label, unit, optional = false, value = "") {
         return `<label class="card input-card"><span class="label-line"><span>${label}</span>${optional ? "<span class='muted' style='font-size:.875rem'>任意</span>" : ""}</span><div class="input-row"><input id="${id}" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" value="${value}" /><span class="unit">${unit}</span></div></label>`;
@@ -400,13 +464,13 @@
       }
       function readPmValues() {
         pmValues = {
-          hkhR: document.getElementById("hkhR").value,
-          hkhMa: document.getElementById("hkhMa").value,
-          actfMa: document.getElementById("actfMa").value,
-          adpInh: document.getElementById("adpInh").value,
-          aaInh: document.getElementById("aaInh").value,
-          adpMa: document.getElementById("adpMa").value,
-          aaMa: document.getElementById("aaMa").value
+          hkhR: document.getElementById("hkhR") ? document.getElementById("hkhR").value : pmValues.hkhR,
+          hkhMa: document.getElementById("hkhMa") ? document.getElementById("hkhMa").value : pmValues.hkhMa,
+          actfMa: document.getElementById("actfMa") ? document.getElementById("actfMa").value : pmValues.actfMa,
+          adpInh: document.getElementById("adpInh") ? document.getElementById("adpInh").value : pmValues.adpInh,
+          aaInh: document.getElementById("aaInh") ? document.getElementById("aaInh").value : pmValues.aaInh,
+          adpMa: document.getElementById("adpMa") ? document.getElementById("adpMa").value : pmValues.adpMa,
+          aaMa: document.getElementById("aaMa") ? document.getElementById("aaMa").value : pmValues.aaMa
         };
       }
       function enteredSummary(values, labels) {
@@ -420,16 +484,16 @@
           <div class="seg two mt4"><button id="general" class="${ghContext === "general" ? "active" : ""}">一般</button><button id="ecmo" class="${ghContext === "ecmo" ? "active" : ""}">ECMO</button></div>
           <div class="stack mt4">${field("ckR","CK-R","min",false,ghValues.ckR)}${field("ckhR","CKH-R","min",false,ghValues.ckhR)}${field("crtMa","CRT-MA","mm",false,ghValues.crtMa)}${field("cffMa","CFF-MA","mm",false,ghValues.cffMa)}<div id="fibPanel" style="${showFib ? "" : "display:none"}">${field("fib","フィブリノゲン値","mg/dL",false,ghValues.fib)}</div>${field("ly30","LY30","%",false,ghValues.ly30)}</div>
           <button class="submit mt5" id="submit">解釈する</button><div class="mt5">${safety(true)}</div>${footer()}</main>`;
-        back.onclick = () => setScreen("home");
-        general.onclick = () => { readGhValues(); ghContext = "general"; renderGh(); };
-        ecmo.onclick = () => { readGhValues(); ghContext = "ecmo"; renderGh(); };
+        byId("back").onclick = () => setScreen("home");
+        byId("general").onclick = () => { readGhValues(); ghContext = "general"; renderGh(); };
+        byId("ecmo").onclick = () => { readGhValues(); ghContext = "ecmo"; renderGh(); };
         bindInputs();
         cffMa.oninput = () => {
           cffMa.value = cffMa.value.replace(/[０-９．]/g, ch => ch === "．" ? "." : String.fromCharCode(ch.charCodeAt(0) - 0xfee0)).replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
           const panel = document.getElementById("fibPanel");
           panel.style.display = ghContext === "ecmo" && cffMa.value !== "" && Number(cffMa.value) < 15 ? "" : "none";
         };
-        submit.onclick = () => {
+        byId("submit").onclick = () => {
           readGhValues();
           const v = { ckR: val("ckR"), ckhR: val("ckhR"), crtMa: val("crtMa"), cffMa: val("cffMa"), ly30: val("ly30"), fib: document.getElementById("fib") ? val("fib") : undefined };
           const labels = ghContext === "ecmo" ? [["ckR","CK-R","min"],["ckhR","CKH-R","min"],["crtMa","CRT-MA","mm"],["cffMa","CFF-MA","mm"],["fib","フィブリノゲン値","mg/dL"],["ly30","LY30","%"]] : [["ckR","CK-R","min"],["ckhR","CKH-R","min"],["crtMa","CRT-MA","mm"],["cffMa","CFF-MA","mm"],["ly30","LY30","%"]];
@@ -438,23 +502,28 @@
         };
       }
       function renderPm() {
+        const showAaFields = pmContext === "antiplatelet";
+        const antiplateletNotice = showAaFields ? `<section class="notice-card mt4">抗血小板薬の効果判定にはTEG PMを検討します。アスピリンの効果を見る場合は、採血後30分静置してから測定した値か確認してください。</section>` : "";
+        const aaFields = showAaFields ? `${field("aaInh","AA inhibition","%",false,pmValues.aaInh)}${field("aaMa","AA-MA","mm",true,pmValues.aaMa)}` : "";
         app.innerHTML = `<main class="wrap">
           <button class="back" id="back">戻る</button><h1>TEG PM入力</h1><div class="mt4">${tube("PM")}</div>
-          <div class="seg three mt4"><button data-pm="trauma" class="${pmContext === "trauma" ? "active" : ""}">外傷</button><button data-pm="tbi" class="${pmContext === "tbi" ? "active" : ""}">頭部外傷</button><button data-pm="antiplatelet" class="${pmContext === "antiplatelet" ? "active" : ""}">抗血小板</button></div>
-          <div class="stack mt4">${field("hkhR","HKH-R","min",false,pmValues.hkhR)}${field("hkhMa","HKH-MA","mm",false,pmValues.hkhMa)}${field("actfMa","ActF-MA","mm",false,pmValues.actfMa)}${field("adpInh","ADP inhibition","%",false,pmValues.adpInh)}${field("aaInh","AA inhibition","%",false,pmValues.aaInh)}${field("adpMa","ADP-MA","mm",true,pmValues.adpMa)}${field("aaMa","AA-MA","mm",true,pmValues.aaMa)}</div>
+          <div class="seg two mt4"><button data-pm="trauma" class="${pmContext === "trauma" ? "active" : ""}">外傷</button><button data-pm="antiplatelet" class="${pmContext === "antiplatelet" ? "active" : ""}">抗血小板</button></div>
+          ${antiplateletNotice}
+          <div class="stack mt4">${field("hkhR","HKH-R","min",false,pmValues.hkhR)}${field("hkhMa","HKH-MA","mm",false,pmValues.hkhMa)}${field("actfMa","ActF-MA","mm",false,pmValues.actfMa)}${field("adpInh","ADP inhibition","%",false,pmValues.adpInh)}${field("adpMa","ADP-MA","mm",true,pmValues.adpMa)}${aaFields}</div>
           <button class="submit mt5" id="submit">解釈する</button><div class="mt5">${safety(true)}</div>${footer()}</main>`;
-        back.onclick = () => setScreen("home");
+        byId("back").onclick = () => setScreen("home");
         document.querySelectorAll("[data-pm]").forEach(b => b.onclick = () => { readPmValues(); pmContext = b.dataset.pm; renderPm(); });
         bindInputs();
-        submit.onclick = () => {
+        byId("submit").onclick = () => {
           readPmValues();
-          const v = { hkhR: val("hkhR"), hkhMa: val("hkhMa"), actfMa: val("actfMa"), adpInhibition: val("adpInh"), aaInhibition: val("aaInh"), adpMa: val("adpMa"), aaMa: val("aaMa") };
-          const label = pmContext === "tbi" ? "頭部外傷" : pmContext === "antiplatelet" ? "抗血小板薬" : "外傷TTP";
-          resultState = { title: `TEG PM ${label}解釈`, results: interpretPm(v, pmContext), warnings: warningsPm(v), previous: "pm", values: v, labels: [["hkhR","HKH-R","min"],["hkhMa","HKH-MA","mm"],["actfMa","ActF-MA","mm"],["adpInhibition","ADP inhibition","%"],["aaInhibition","AA inhibition","%"],["adpMa","ADP-MA","mm"],["aaMa","AA-MA","mm"]] };
+          const v = { hkhR: val("hkhR"), hkhMa: val("hkhMa"), actfMa: val("actfMa"), adpInhibition: val("adpInh"), adpMa: val("adpMa"), aaInhibition: showAaFields ? val("aaInh") : undefined, aaMa: showAaFields ? val("aaMa") : undefined };
+          const label = pmContext === "antiplatelet" ? "抗血小板薬" : "外傷TTP";
+          const labels = showAaFields ? [["hkhR","HKH-R","min"],["hkhMa","HKH-MA","mm"],["actfMa","ActF-MA","mm"],["adpInhibition","ADP inhibition","%"],["adpMa","ADP-MA","mm"],["aaInhibition","AA inhibition","%"],["aaMa","AA-MA","mm"]] : [["hkhR","HKH-R","min"],["hkhMa","HKH-MA","mm"],["actfMa","ActF-MA","mm"],["adpInhibition","ADP inhibition","%"],["adpMa","ADP-MA","mm"]];
+          resultState = { title: `TEG PM ${label}解釈`, results: interpretPm(v, pmContext), warnings: warningsPm(v), previous: "pm", values: v, labels };
           setScreen("result");
         };
       }
-      function card(id, severity, title, assessment, action, rationale = "", strength = "参考") { return { id, severity, title, assessment, action, rationale, strength }; }
+      function card(id, severity, title, assessment, action, rationale = "", strength = "参考", referenceRange = "") { return { id, severity, title, assessment, action, rationale, strength, referenceRange }; }
       function un(id, label) { return card(id, "gray", `【未評価】${label}`, "未入力のため未評価です。", "入力後、該当項目を再評価してください。", "", "注意"); }
       function sort(rs) { return rs.sort((a, b) => rank[a.severity] - rank[b.severity]); }
       function interpretGh(v) {
@@ -520,35 +589,38 @@
         }
         if ((v.crtMa !== undefined && v.crtMa >= 70) || (v.cffMa !== undefined && v.cffMa >= 35)) r.push(card("ecmo-ma","yellow","【要判断】MA高値","過凝固・炎症・感染兆候の可能性があります。","感染、炎症、血栓リスク、回路所見を確認してください。",`CRT-MA ${v.crtMa ?? "未入力"} mm、CFF-MA ${v.cffMa ?? "未入力"} mm`,"Expert opinion / 参考"));
         else if (v.crtMa === undefined && v.cffMa === undefined) r.push(un("ecmo-ma-un","MA高値"));
-        r.push(card("ecmo-note","yellow","【要判断】ECMO中TEG GH","TEG GHはAPTT/ACTの代替ではなく補助指標です。","回路所見、出血所見、血栓所見、通常凝固検査と合わせて判断してください。","","Expert opinion / 参考"));
         return sort(r);
       }
       function interpretPm(v, ctx) {
         const r = [];
-        if (ctx === "tbi") r.push(card("tbi-note","yellow","【要判断】頭部外傷と血小板機能","抗血小板薬内服がなくても、頭部外傷そのものにより血小板機能抑制を来す可能性があります。","ADP inhibition、ADP-MA、出血所見と合わせて評価してください。","","Expert opinion / 参考"));
+        if (ctx === "trauma") r.push(card("tbi-note","yellow","【要判断】頭部外傷と血小板機能",'<span class="inline-highlight">特に頭部外傷では抗血小板薬内服なしでも血小板機能抑制を来すことがあります。</span>',"血小板数に関わらず、血小板機能抑制があれば血小板輸血を検討してください。","","Expert opinion / 参考"));
         if (v.actfMa === undefined) r.push(un("actf-un","ActF-MA"));
-        else if (v.actfMa < 5) r.push(card("actf-low","red","【異常】フィブリノゲン低下","フィブリノゲン不足または凝集能低下を疑います。","Fib 3g投与を検討します。",`ActF-MA ${v.actfMa} mm`,"検討"));
-        else r.push(card("actf-ok","green","【範囲内】ActF-MA",v.actfMa >= 10.5 ? "Fib 200mg/dL相当以上の目安です。" : "Fib 150mg/dL相当以上の目安です。","実測フィブリノゲン値、出血所見と合わせて判断してください。",`ActF-MA ${v.actfMa} mm`));
+        else if (v.actfMa < 5) r.push(card("actf-low","red","【異常】フィブリノゲン低下","フィブリノゲン不足または凝集能低下を疑います。","Fib 3g投与を検討します。",`入力値 ActF-MA ${v.actfMa} mm`,"検討","基準値 ActF-MA 5 mm以上 / Fib近似 4.5 mm≒150mg/dL、10.5 mm≒200mg/dL"));
+        else r.push(card("actf-ok","green","【範囲内】ActF-MA",v.actfMa >= 10.5 ? "Fib 200mg/dL相当以上の目安です。" : "Fib 150mg/dL相当以上の目安です。","実測フィブリノゲン値、出血所見と合わせて判断してください。",`入力値 ActF-MA ${v.actfMa} mm`,"参考","基準値 ActF-MA 5 mm以上 / Fib近似 4.5 mm≒150mg/dL、10.5 mm≒200mg/dL"));
         if (v.hkhMa === undefined) r.push(un("hkhma-un","HKH-MA"));
-        else if (v.hkhMa < 45) r.push(card("hkhma-low","red","【異常】血餅強度低下","全体の血餅強度低下を疑います。","血小板輸血を検討します。",`HKH-MA ${v.hkhMa} mm`,"検討"));
-        else r.push(card("hkhma-ok","green","【範囲内】HKH-MA","全体の血餅強度は目標範囲内の目安です。","臨床所見と合わせて判断してください。",`HKH-MA ${v.hkhMa} mm`));
+        else if (v.hkhMa < 45) r.push(card("hkhma-low","red","【異常】血餅強度低下","全体の血餅強度低下を疑います。","血小板輸血を検討します。",`入力値 HKH-MA ${v.hkhMa} mm`,"検討","基準値 HKH-MA 45 mm以上"));
+        else r.push(card("hkhma-ok","green","【範囲内】HKH-MA","全体の血餅強度は目標範囲内の目安です。","臨床所見と合わせて判断してください。",`入力値 HKH-MA ${v.hkhMa} mm`,"参考","基準値 HKH-MA 45 mm以上"));
         if (v.adpInhibition === undefined) r.push(un("adp-un","ADP inhibition"));
-        else if (v.adpInhibition > 60) r.push(card("adp-high","red","【異常】ADP系血小板機能抑制",ctx === "tbi" ? "頭部外傷に伴うADP系血小板機能抑制を疑います。" : "ADP系血小板機能抑制を疑います。","血小板輸血を検討します。",`ADP inhibition ${v.adpInhibition}%`,"検討"));
-        else r.push(card("adp-ok","green","【範囲内】ADP inhibition","外傷TTPの重要閾値は超えていません。","ADP-MA、血小板数、出血所見と合わせて判断してください。",`ADP inhibition ${v.adpInhibition}%`));
-        if (v.aaInhibition === undefined) r.push(un("aa-un","AA inhibition"));
-        else if (v.aaInhibition > 30) r.push(card("aa-high","yellow","【要判断】アスピリン効果","AA系抑制あり。アスピリン効果の可能性があります。","アスピリンの効果を見る場合は、採血後30分待ってから測定した値か確認してください。処置延期、方法変更、血小板輸血を臨床状況に応じて検討します。",`AA inhibition ${v.aaInhibition}%`,"参考"));
-        else r.push(card("aa-ok","green","【範囲内】AA inhibition","AA inhibitionは30%以下です。抗血小板薬効果は強くない可能性があります。","薬剤歴、出血所見、処置リスクと合わせて判断してください。",`AA inhibition ${v.aaInhibition}%`));
-        if (v.hkhR === undefined) r.push(un("hkhr-un","HKH-R"));
-        else if (v.hkhR > 10) r.push(card("hkhr-high","yellow","【要判断】HKH-R延長","凝固因子不足の可能性を参考所見として表示します。","出血量、重症度、通常凝固検査、術野所見と合わせてFFPを検討します。HKH-R単独でFFP判断を強く推奨しません。",`HKH-R ${v.hkhR} min`,"Expert opinion / 参考"));
-        else r.push(card("hkhr-ok","green","【範囲内】HKH-R","HKH-Rは10分以内です。ただしPMのR時間は確立閾値ではありません。","他の項目と臨床所見を確認してください。",`HKH-R ${v.hkhR} min`));
-        if (v.adpMa === undefined) r.push(un("adpma-un","ADP-MA"));
-        else if (v.adpMa <= 20) r.push(card("adpma-vlow","yellow","【要判断】ADP-MA著明低値","ADP系血小板機能低下が強い可能性があります。","血小板輸血を検討します。",`ADP-MA ${v.adpMa} mm`,"Expert opinion / 検討"));
-        else if (v.adpMa <= 40) r.push(card("adpma-low","yellow","【要判断】ADP-MA低値","ADP系血小板機能低下の可能性があります。","ADP inhibition、血小板数、出血所見と合わせて血小板輸血を検討します。",`ADP-MA ${v.adpMa} mm`,"Expert opinion / 参考"));
-        else r.push(card("adpma-ok","green","【範囲内】ADP-MA","ADP-MAは参考低値閾値を下回っていません。","ADP inhibition、血小板数、出血所見と合わせて判断してください。",`ADP-MA ${v.adpMa} mm`));
-        if (v.aaMa === undefined) r.push(un("aama-un","AA-MA"));
-        else r.push(card("aama-ref","yellow","【要判断】AA-MA参考値","AA-MAは参考値として表示します。","AA inhibition、アスピリン内服歴、採血後30分待って測定した値かを確認してください。",`AA-MA ${v.aaMa} mm`,"Expert opinion / 参考"));
+        else if (v.adpInhibition > 60) r.push(card("adp-high","red","【異常】ADP系血小板機能抑制","ADP系血小板機能抑制を疑います。","血小板輸血を検討します。",`入力値 ADP inhibition ${v.adpInhibition}%`,"検討","基準値 ADP inhibition 60%以下"));
+        else r.push(card("adp-ok","green","【範囲内】ADP inhibition","外傷TTPの重要閾値は超えていません。","ADP-MA、血小板数、出血所見と合わせて判断してください。",`入力値 ADP inhibition ${v.adpInhibition}%`,"参考","基準値 ADP inhibition 60%以下"));
         if (ctx === "antiplatelet") {
-          if (v.adpInhibition > 30) r.push(card("ap-adp","yellow","【要判断】P2Y12阻害薬効果","P2Y12阻害薬効果の可能性があります。","クロピドグレル、プラスグレル、チカグレロルなどの影響を検討します。",`ADP inhibition ${v.adpInhibition}%`));
+          if (v.aaInhibition === undefined) r.push(un("aa-un","AA inhibition"));
+          else if (v.aaInhibition > 30) r.push(card("aa-high","yellow","【要判断】アスピリン効果","AA系抑制あり。アスピリン効果の可能性があります。","アスピリンの効果を見る場合は、採血後30分待ってから測定した値か確認してください。処置延期、方法変更、血小板輸血を臨床状況に応じて検討します。",`AA inhibition ${v.aaInhibition}%`,"参考"));
+          else r.push(card("aa-ok","green","【範囲内】AA inhibition","AA inhibitionは30%以下です。抗血小板薬効果は強くない可能性があります。","薬剤歴、出血所見、処置リスクと合わせて判断してください。",`AA inhibition ${v.aaInhibition}%`));
+        }
+        if (v.hkhR === undefined) r.push(un("hkhr-un","HKH-R"));
+        else if (v.hkhR > 10) r.push(card("hkhr-high","yellow","【要判断】HKH-R延長","凝固因子不足の可能性を参考所見として表示します。","出血量、重症度、通常凝固検査、術野所見と合わせてFFPを検討します。HKH-R単独でFFP判断を強く推奨しません。",`入力値 HKH-R ${v.hkhR} min`,"Expert opinion / 参考","参考基準 HKH-R 10 min以下"));
+        else r.push(card("hkhr-ok","green","【範囲内】HKH-R","HKH-Rは10分以内です。ただしPMのR時間は確立閾値ではありません。","他の項目と臨床所見を確認してください。",`入力値 HKH-R ${v.hkhR} min`,"参考","参考基準 HKH-R 10 min以下"));
+        if (v.adpMa === undefined) r.push(un("adpma-un","ADP-MA"));
+        else if (v.adpMa <= 20) r.push(card("adpma-vlow","yellow","【要判断】ADP-MA著明低値","ADP系血小板機能低下が強い可能性があります。","血小板輸血を検討します。",`入力値 ADP-MA ${v.adpMa} mm`,"Expert opinion / 検討","参考基準 ADP-MA 20 mm超"));
+        else if (v.adpMa <= 40) r.push(card("adpma-low","yellow","【要判断】ADP-MA低値","ADP系血小板機能低下の可能性があります。","血小板機能低下を疑い、血小板輸血を検討します。",`入力値 ADP-MA ${v.adpMa} mm`,"Expert opinion / 参考","参考基準 ADP-MA 40 mm超"));
+        else r.push(card("adpma-ok","green","【範囲内】ADP-MA","ADP-MAは参考低値閾値を下回っていません。","ADP inhibition、血小板数、出血所見と合わせて判断してください。",`ADP-MA ${v.adpMa} mm`));
+        if (ctx === "antiplatelet") {
+          if (v.aaMa === undefined) r.push(un("aama-un","AA-MA"));
+          else r.push(card("aama-ref","yellow","【要判断】AA-MA参考値","AA-MAは参考値として表示します。","AA inhibition、アスピリン内服歴、採血後30分待って測定した値かを確認してください。",`AA-MA ${v.aaMa} mm`,"Expert opinion / 参考"));
+        }
+        if (ctx === "antiplatelet") {
+          if (v.adpInhibition > 30) r.push(card("ap-adp","yellow","【要判断】P2Y12阻害薬効果","P2Y12阻害薬効果の可能性があります。","クロピドグレル、プラスグレル、チカグレロルなどの影響を検討します。",`入力値 ADP inhibition ${v.adpInhibition}%`,"参考","参考基準 ADP inhibition 30%以下"));
         }
         if (v.hkhR < 10 && v.hkhMa >= 45 && v.adpInhibition < 60 && v.actfMa >= 5) r.push(card("mtp","yellow","【要判断】MTP de-escalation候補","TEG上は凝固・血小板機能の立ち上がりがあります。","出血所見・バイタル・止血状況と合わせてMTP減量/終了を検討します。自動終了してよいという意味ではありません。","","Expert opinion / 検討"));
         return sort(r);
@@ -574,11 +646,27 @@
           <div><button class="back" id="back">入力へ戻る</button><button class="back" id="home">トップ</button></div>
           <h1>${resultState.title}</h1>
           ${enteredSummary(resultState.values, resultState.labels)}
-          ${resultState.warnings.length ? `<section class="result-card yellow mt4">${resultState.warnings.map(w => `<p>${w}</p>`).join("")}</section>` : ""}
-          <section class="stack mt4">${resultState.results.map(r => `<article class="result-card ${r.severity}"><h2>${r.title}</h2><dl><div><dt>判定</dt><dd>${r.assessment}</dd></div>${r.rationale ? `<div><dt>根拠</dt><dd>${r.rationale}</dd></div>` : ""}<div><dt>次に検討</dt><dd><strong>${r.action}</strong></dd></div><div><dt>文言強度</dt><dd>${r.strength}</dd></div></dl></article>`).join("")}</section>
+          <section class="stack mt4">${renderResultCards()}</section>
+          ${ecmoNotice()}
           <div class="mt5">${safety()}</div>${footer()}</main>`;
-        back.onclick = () => setScreen(resultState.previous);
-        home.onclick = () => setScreen("home");
+        byId("back").onclick = () => setScreen(resultState.previous);
+        byId("home").onclick = () => setScreen("home");
+      }
+      function ecmoNotice() {
+        if (resultState.title !== "TEG GH ECMO解釈") return "";
+        return `<section class="inline-note mt5"><h2>ECMO中TEG GHの注意</h2><p>TEG GHはAPTT/ACTの代替ではなく補助指標です。回路所見、出血所見、血栓所見、通常凝固検査と合わせて判断してください。</p></section>`;
+      }
+      function renderResultCards() {
+        const ordered = [...resultState.results].sort((a, b) => rank[a.severity] - rank[b.severity]);
+        const cardHtml = r => {
+          const urgent = resultState.title === "TEG PM 外傷TTP解釈" && r.severity === "red" ? " urgent" : "";
+          const rationale = [r.referenceRange, r.rationale].filter(Boolean).join("<br>");
+          return `<article class="result-card ${r.severity}${urgent}"><h2>${r.title}</h2><dl><div><dt>判定</dt><dd>${r.assessment}</dd></div>${rationale ? `<div><dt>根拠</dt><dd>${rationale}</dd></div>` : ""}<div><dt>次に検討</dt><dd><strong>${r.action}</strong></dd></div><div><dt>文言強度</dt><dd>${r.strength}</dd></div></dl></article>`;
+        };
+        const red = ordered.filter(r => r.severity === "red").map(cardHtml).join("");
+        const warning = resultState.warnings.length ? `<section class="result-card yellow">${resultState.warnings.map(w => `<p>${w}</p>`).join("")}</section>` : "";
+        const rest = ordered.filter(r => r.severity !== "red").map(cardHtml).join("");
+        return red + warning + rest;
       }
       render();
     </script>

@@ -1,0 +1,13 @@
+{
+  "targets": {
+    "ckRMin": 16,
+    "ckRMax": 24,
+    "ckhRGeneralMax": 10,
+    "ckhRYellowMax": 16,
+    "ratioHigh": 2,
+    "ratioReferenceMin": 1.5,
+    "ratioReferenceMax": 2,
+    "crtMaHigh": 70,
+    "cffMaHigh": 35
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "normal": {
+    "hkhRMax": 10,
+    "hkhMaMin": 45,
+    "actfMaCritical": 5,
+    "adpInhibitionHigh": 60,
+    "antiplateletThreshold": 30,
+    "adpMaLow": 40,
+    "adpMaVeryLow": 20,
+    "actfMaFib150": 4.5,
+    "actfMaFib200": 10.5
+  }
+}

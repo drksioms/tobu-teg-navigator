@@ -1,0 +1,39 @@
+{
+  "normal": {
+    "ckRMax": 10,
+    "ckhRMax": 10,
+    "crtMaMin": 50,
+    "cffMaMin": 15,
+    "ly30Max": 3
+  },
+  "high": {
+    "crtMa": 70,
+    "cffMa": 35
+  },
+  "rules": [
+    {
+      "id": "GH-R-04",
+      "title": "【異常】ヘパリン影響",
+      "assessment": "自己凝固能は保たれ、ヘパリン影響が主体の可能性があります。",
+      "action": "プロタミンを検討します。",
+      "strength": "検討",
+      "severity": "red"
+    },
+    {
+      "id": "GH-R-05",
+      "title": "【異常】凝固因子不足",
+      "assessment": "ヘパリンより凝固因子不足が主体の可能性があります。",
+      "action": "FFP補充を検討します。",
+      "strength": "検討",
+      "severity": "red"
+    },
+    {
+      "id": "GH-R-06",
+      "title": "【範囲内】R時間",
+      "assessment": "R時間は概ね許容範囲です。",
+      "action": "他の項目と臨床所見を確認してください。",
+      "strength": "参考",
+      "severity": "green"
+    }
+  ]
+}

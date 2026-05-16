@@ -1,0 +1,14 @@
+{
+  "options": [
+    { "id": "trauma", "label": "外傷", "mode": "PM", "message": "外傷ではTEG PMを優先的に検討します。", "context": "trauma" },
+    { "id": "ecmo", "label": "ECMO/IMPELLA", "mode": "GH", "message": "ECMO/IMPELLA中の抗凝固・凝固因子評価はTEG GHを検討します。", "context": "ecmo" },
+    { "id": "antiplatelet", "label": "抗血小板の効果判定をしたい", "mode": "PM", "message": "抗血小板薬の効果判定にはTEG PMを検討します。アスピリンの効果を見る場合は、採血後30分待ってから測定してください。", "context": "antiplatelet" },
+    { "id": "heparin", "label": "ヘパリン影響を見たい", "mode": "GH", "message": "ヘパリン影響評価はTEG GHを検討します。", "context": "heparin" },
+    { "id": "factor", "label": "凝固因子不足を見たい", "mode": "GH", "message": "凝固因子不足評価はTEG GHを検討します。", "context": "factor" },
+    { "id": "fibrinogen", "label": "フィブリノゲン不足を見たい", "mode": "GH", "secondaryMode": "PM", "message": "外傷PMではActF-MA、一般評価ではGHのCFF-MAを参照します。", "context": "fibrinogen" },
+    { "id": "lysis", "label": "線溶亢進を見たい", "mode": "GH", "message": "線溶評価はTEG GHでLY30を確認します。", "context": "lysis" },
+    { "id": "unknown", "label": "原因不明の凝固障害", "mode": "GH", "message": "原因不明の凝固障害ではまずTEG GHを検討します。", "context": "factor" },
+    { "id": "hypercoagulable", "label": "過凝固・感染兆候を疑う", "mode": "GH", "message": "MA高値や通常凝固検査と合わせ、TEG GHを参考にします。", "context": "hypercoagulable" },
+    { "id": "vwf", "label": "vWF活性を推定したい", "message": "TEGではvWF活性を直接測定できません。TEG正常でも出血傾向がある場合は、vWF活性低下を考慮します。", "unavailable": true, "strength": "Expert opinion / 参考" }
+  ]
+}
