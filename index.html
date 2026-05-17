@@ -575,7 +575,7 @@
         if (v.ckhR === undefined) r.push(un("ecmo-ckhr-un","CKH-R"));
         else if (v.ckhR > 16) r.push(card("ecmo-ckhr-red","red","【異常】凝固因子不足","凝固因子不足を疑います。","出血所見、凝固検査、フィブリノゲン値と合わせてFFP補充を検討します。",`CKH-R ${v.ckhR} min`,"検討"));
         else if (v.ckhR > 10) r.push(card("ecmo-ckhr-yellow","yellow","【要判断】CKH-R軽度延長","軽度〜中等度の凝固因子低下の可能性があります。","出血傾向がなければ補正なしも検討します。出血時はFFP補正を検討します。",`CKH-R ${v.ckhR} min`,"Expert opinion / 参考"));
-        if (v.ckR !== undefined && v.ckhR > 0 && v.ckR / v.ckhR > 2) r.push(card("ecmo-ratio","red","【異常】ヘパリン影響","ヘパリン影響が強い可能性があります。","APTT、ACT、出血・回路所見と合わせてヘパリン調整を検討します。",`CK-R / CKH-R ${(v.ckR / v.ckhR).toFixed(2)}`,"検討"));
+        if (v.ckR !== undefined && v.ckhR > 0 && v.ckR / v.ckhR > 2) r.push(card("ecmo-ratio","yellow","【要判断】ヘパリン影響","ヘパリン影響が強い可能性があります。","APTT、ACT、出血・回路所見と合わせてヘパリン調整を検討します。",`CK-R / CKH-R ${(v.ckR / v.ckhR).toFixed(2)}`,"検討"));
         if (v.cffMa !== undefined && v.cffMa < 15) {
           if (v.fib === undefined) {
             r.push(card("ecmo-cff-low-fib-un","yellow","【要判断】CFF-MA低値","CFF-MA低値です。フィブリノゲン低下または凝集能低下の可能性があります。","フィブリノゲン実測値を確認してください。Fib >150 mg/dLなら第XIII因子欠乏を示唆する可能性、Fib <150 mg/dLならFFP補充を検討します。",`CFF-MA ${v.cffMa} mm、Fib 未入力`,"Expert opinion / 参考"));

@@ -59,8 +59,8 @@ export function interpretECMO(values: GHValues): ResultCard[] {
     if (ratio > t.ratioHigh) {
       results.push({
         id: "ECMO-RATIO-HIGH",
-        severity: "red",
-        title: "【異常】ヘパリン影響",
+        severity: "yellow",
+        title: "【要判断】ヘパリン影響",
         assessment: "ヘパリン影響が強い可能性があります。",
         action: "APTT、ACT、出血・回路所見と合わせてヘパリン調整を検討します。",
         rationale: `CK-R / CKH-R ${ratio.toFixed(2)}`,
