@@ -66,7 +66,7 @@ function renderHome() {
       </header>
       <section class="mt-5 rounded-md border border-slate-300 bg-white p-4 text-slate-950 shadow-sm">
         <p class="text-base font-bold">TEG manager</p>
-        <p class="mt-2 text-base font-semibold">ID: teg / PASS: tobu1111</p>
+        <p class="mt-2 text-base font-semibold">ログイン情報は管理者に確認してください。</p>
       </section>
       <div class="mt-5 grid gap-4">
         <button id="go-gh" class="min-h-20 rounded-md bg-sky-700 px-5 py-4 text-left text-xl font-bold text-white shadow-sm active:bg-sky-800">TEG GHを解釈する</button>
